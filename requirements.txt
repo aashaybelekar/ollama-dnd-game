@@ -1,8 +1,14 @@
 langchain
+langchain-chroma
 langchain_community
+langchain_huggingface
+langchain_ollama
 langchain_openai
 langchain_groq
+pypdf
 python-dotenv
+sentence-transformers
 streamlit
 langchain_experimental
-lamini
+neo4j
+-e .
