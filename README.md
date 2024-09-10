@@ -40,6 +40,23 @@ This diagram illustrates the flow of information in our retriever chain:
 4. Both retrievers feed into the game logic.
 5. The game logic generates a response, which is then used to update both the vector store and the chronological history list.
 
+## App Preview
+
+#### Model Selection Page
+![Model page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/Model_setup_page.png "Model page")
+
+#### Character Creation Page
+![character page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/character_creation_page.png "character page")
+
+![character page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/character_creation_page_2.png "character page")
+
+![character page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/character_creation_page_3.png "character page")
+
+#### Adventure Page
+![Adventure page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/Adventure_page.png "Adventure page")
+
+![Adventure page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/Chat_page.png "Adventure page")
+
 ## Setup and Installation
 
 <div align="center">
