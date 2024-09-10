@@ -37,7 +37,7 @@ class OllamaApi:
             {user_prompt}
         At last give players options on what they can do, these options are not compalsory.
         You'll tell each players pov and what they are doing.
-        each player will have different rolls
+        each player are actually different users. don't confuse them by using "your" use the character names.
         """
 
         prompt = ChatPromptTemplate.from_template(template)
