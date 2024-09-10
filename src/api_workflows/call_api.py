@@ -36,6 +36,8 @@ class OllamaApi:
         The player wants the world like:
             {user_prompt}
         At last give players options on what they can do, these options are not compalsory.
+        You'll tell each players pov and what they are doing.
+        each player will have different rolls
         """
 
         prompt = ChatPromptTemplate.from_template(template)
@@ -67,39 +69,56 @@ class OllamaApi:
 
         return chain.invoke({"adventure":adventure})
 
-    def progress_story(self, character:str, text:str, history:list)->Generator:
-        def get_history(input:str, chat_history:list):
+    def progress_story(self, chat_msg:dict[str, str], history:list)->Generator:
+        def get_history(chat:dict[str, str], chat_history:list):
             history = chat_history.copy()
-            history_retrieved_docs = st.session_state.history_store.similarity_search_by_vector_with_relevance_scores(embedding=st.session_state.embedding_model.embed_query(input))
-            historical_history = []
 
+            history_retrieved_docs = []
+            for msg in chat.values():
+                history_retrieved_docs.extend(
+                        st.session_state.history_store.similarity_search_by_vector_with_relevance_scores(
+                        embedding=st.session_state.embedding_model.embed_query(msg), 
+                        k=2,
+                        filter = {
+                            "uuid": st.session_state["current_uuid"]
+                        }
+                        )
+                )
+
+            historical_history = []
             for docs, _ in history_retrieved_docs[::-1]:
                 if docs.metadata['source'] == "AI":
                     historical_history.append(AIMessage(docs.page_content))
                 else:
                     historical_history.append(HumanMessage(docs.page_content))
-            
-            history = [hist for _, hist in history[1:]]
-            res_chat = [] # system prompt
+
+            res_chat = [history[0][1]] # system prompt is stored for player context
+            history = [hist for _, hist in history[1:]] #
             res_chat.extend(historical_history)
-            res_chat.extend(history[-3:])
+            res_chat.extend(history[-5:]) #last 5 messages
 
             return res_chat
 
+        def get_input()->str:
+            res = ""
+            for character, message in chat_msg.items():
+                res += f"{character} said: {message}"
+                res += '\n\n'
+            return res
 
         contextualize_q_system_prompt = (
-            "Given a chat history and the latest user question "
+            "Given a chat history and the latest user statement "
             "which might reference context in the chat history, "
             "formulate a standalone statement which can be understood "
-            "without the chat history. Do NOT answer the question, "
+            "without the chat history. Do NOT answer the statement, "
             "just reformulate it if needed and otherwise return it as is."
         )
 
         contextualize_q_prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", contextualize_q_system_prompt),
-                MessagesPlaceholder("chat_history"),
-                ("human", "{input}"),
+                    ("system", contextualize_q_system_prompt),
+                    MessagesPlaceholder("chat_history"),
+                    ("human", "{input}"),
             ]
         )
         history_aware_retriever = create_history_aware_retriever(
@@ -108,17 +127,19 @@ class OllamaApi:
 
         system_prompt = (
             "You are a dungeon master for an adventure. "
-            "Use could take help of the following pieces of retrieved context to answer"
-            "be creative"
+            "Use could take help of the following pieces of retrieved context to answer. "
+            "Be creative. "
+            "You'll tell each players pov and what they are doing. by specifying their name."
+            "each player will have different rolls"
             "\n\n"
             "{context}"
         )
 
         qa_prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", system_prompt),
-                MessagesPlaceholder("chat_history"),
-                ("human", "{input}"),
+                    ("system", system_prompt),
+                    MessagesPlaceholder("chat_history"),
+                    ("human", "{input}"),
             ]
         )
 
@@ -126,8 +147,12 @@ class OllamaApi:
         question_answer_chain = create_stuff_documents_chain(self.llm, qa_prompt)
 
         rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+        
+        input_text = get_input()
+        history_as_message = get_history(chat=chat_msg, chat_history=history)
 
-        for output in rag_chain.stream({"input": text, "chat_history": get_history(text, history)}):
+
+        for output in rag_chain.stream({"input":input_text, "chat_history":history_as_message}):
             if "answer" in output:
                 yield output['answer']
 

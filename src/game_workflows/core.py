@@ -27,7 +27,7 @@ def start_adventure():
     st.divider()
     characters = load_characters()
     adventure_user_prompt = None
-    characters_in_adventure = None
+
     if not has_adventure_started:
         st.session_state["characters_in_adventure"] = st.multiselect("Which hero will you choose for this adventure?", characters.keys())
 
@@ -47,6 +47,7 @@ def start_adventure():
 
                 with st.spinner("Thinking of a name for this adventure.."):
                     adventure_name = st.session_state['api'].name_adventure(adventure_start)
+                    adventure_name = adventure_name.replace("\"", "")
                 
                 st.session_state["current_uuid"] = str(uuid4())
 
@@ -58,7 +59,7 @@ def start_adventure():
                 st.session_state['api'].save_doc_to_history_vector(history_document)
 
                 with st.spinner("Saving.."):
-                    save_adventure(st.session_state["current_uuid"], history=st.session_state["chat_history"], history_names=st.session_state['adventure_dict'])
+                    save_adventure(st.session_state["current_uuid"], history=st.session_state["chat_history"], history_names=st.session_state['adventure_dict'], characters=st.session_state["characters_in_adventure"])
                 st.rerun()
     
         if not st.session_state["characters_in_adventure"]:
@@ -81,28 +82,44 @@ def start_adventure():
 
         # Message Input Area
         with st.form(key='chat_form', clear_on_submit=True):
-            speaking_character = st.selectbox(
-                "Which character is talking?", 
-                st.session_state.characters_in_adventure
-            )
-            chat_message = st.text_area("Enter message", height=100)
+            # Create a dictionary to store messages for each character
+            chat_message = {}
+            
+            # Loop through each character and create a text area for them
+            for character in st.session_state.characters_in_adventure:
+                chat_message[character] = st.text_area(
+                    f"Message for {character}",
+                    key=f"message_{character}",
+                    height=100
+                )
+            
             submit_button = st.form_submit_button("➡️")
 
         # Handle form submission
         if submit_button and chat_message:
             # Store the new message in chat history
-            st.session_state["chat_history"].append((speaking_character, HumanMessage(chat_message)))
-            history_document = Document(page_content=chat_message, metadata={'source':f"{speaking_character}", "uuid":st.session_state["current_uuid"]})
-
-            st.session_state['api'].save_doc_to_history_vector(history_document)
+            st.session_state.temp_chat_state = st.session_state["chat_history"]
+            for character, message in chat_message.items(): # Done before processing to display the text on the UI
+                if message:
+                    st.session_state["chat_history"].append((character, HumanMessage(message)))
+                
 
             with st.spinner("Thinking.."):
-                adventure_progression = st.write_stream(st.session_state["api"].progress_story(speaking_character, chat_message, st.session_state["chat_history"]))
+                adventure_progression = st.write_stream(st.session_state["api"].progress_story(chat_message, st.session_state.temp_chat_state))
+            
+            for character, message in chat_message.items():
+                if message:
+                    history_document = Document(page_content=message, metadata={'source':f"{character}", "uuid":st.session_state["current_uuid"]})
+                    with st.spinner("Saving.."):
+                        save_adventure(st.session_state["current_uuid"], history=st.session_state["chat_history"], history_names=st.session_state['adventure_dict'])
+                        st.session_state['api'].save_doc_to_history_vector(history_document)
             
             st.session_state['chat_history'].append((None, AIMessage(adventure_progression)))
             history_document = Document(page_content=adventure_progression, metadata={'source':"AI", "uuid":st.session_state["current_uuid"]})
 
-            st.session_state['api'].save_doc_to_history_vector(history_document)
+            with st.spinner("Saving.."):
+                save_adventure(st.session_state["current_uuid"], history=st.session_state["chat_history"], history_names=st.session_state['adventure_dict'])
+                st.session_state['api'].save_doc_to_history_vector(history_document)
 
             st.rerun()
 

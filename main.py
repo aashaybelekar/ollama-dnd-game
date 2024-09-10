@@ -42,21 +42,22 @@ def main():
 
     test_model_availability()
 
-    page = st.sidebar.radio("Navigation", ["Play Game", "Manage Models"], index=1)
+    st.session_state.page = st.sidebar.radio("Navigation", ["Play Game", "Manage Models"], index=1)
 
-    if page == "Play Game":
+    if st.session_state.page == "Play Game":
         play_game()
 
+        display_character_list()
+        display_adventure_list()
 
-    elif page == "Manage Models":
+        
+
+
+    elif st.session_state.page == "Manage Models":
         manage_models()
         display_updated_status_sidebar()
 
     st.sidebar.divider()
-
-    display_character_list()
-
-    display_adventure_list()
 
     st.sidebar.info("""
     ## How to Play
