@@ -4,6 +4,7 @@
 - [Technical Overview](#technical-overview)
 - [Features](#features)
 - [Retriever Chain Architecture](#retriever-chain-architecture)
+- [App Preview](#app-preview)
 - [Setup and Installation](#setup-and-installation)
 
 ## Technical Overview
