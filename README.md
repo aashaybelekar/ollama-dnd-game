@@ -5,9 +5,6 @@
 - [Features](#features)
 - [Retriever Chain Architecture](#retriever-chain-architecture)
 - [Setup and Installation](#setup-and-installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Technical Overview
 
