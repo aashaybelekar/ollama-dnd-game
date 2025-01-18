@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+from typing import Union
 from uuid import uuid4
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.documents import Document
@@ -15,8 +16,7 @@ def initialise_adventure_session_state():
     if "has_adventure_started" not in st.session_state:
         st.session_state["has_adventure_started"] = False
     if "chat_history" not in st.session_state:
-        st.session_state["chat_history"]: list(
-            AIMessage | HumanMessage | SystemMessage) = []
+        st.session_state["chat_history"] = []
     if "adventure_dict" not in st.session_state:
         st.session_state['adventure_dict'] = {}
     if "characters_in_adventure" not in st.session_state:

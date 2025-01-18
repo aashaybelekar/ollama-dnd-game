@@ -60,8 +60,8 @@ def manage_models():
 
     if st.button("Save Model Selections"):
         st.session_state.dm_model = dm_model
-        st.session_state.api: OllamaApi = OllamaApi(
-            model=dm_model)  # type: ignore
+        st.session_state.api = OllamaApi(
+            model=dm_model)
         st.session_state.embedding_model = HuggingFaceEmbeddings(
             model_name=embedding_model)
         st.session_state.vector_store = initialize_rag()  # retriver
