@@ -16,7 +16,8 @@ def create_character_form():
         if 'character_created' not in st.session_state:
             st.session_state.character_created = False
         if 'ability_scores' not in st.session_state:
-            st.session_state.ability_scores = {ability: 8 for ability in ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]}
+            st.session_state.ability_scores = {ability: 8 for ability in [
+                "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]}
         if 'remaining_points' not in st.session_state:
             st.session_state.remaining_points = TOTAL_SKILL_POINTS
 
@@ -27,17 +28,18 @@ def create_character_form():
     def update_ability_score(ability):
         old_score = st.session_state.ability_scores[ability]
         new_score = st.session_state[f"ability_{ability}"]
-        
+
         old_points = calculate_points_spent(old_score)
         new_points = calculate_points_spent(new_score)
-        
+
         st.session_state.ability_scores[ability] = new_score
         st.session_state.remaining_points += old_points - new_points
-    
+
     def reset_character_form():
-        st.session_state.ability_scores = {ability: 8 for ability in ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]}
+        st.session_state.ability_scores = {ability: 8 for ability in [
+            "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]}
         st.session_state.remaining_points = TOTAL_SKILL_POINTS
-    
+
     initialize_session_state()
 
     st.header("Character Creation Form")
@@ -47,42 +49,45 @@ def create_character_form():
     col1, col2 = st.columns(2)
     with col1:
         name = st.text_input("Character Name", key="character_name")
-        race = st.selectbox("Race", ["Human", "Elf", "Dwarf", "Halfling", "Gnome", "Half-Orc", "Tiefling"], key="race")
+        race = st.selectbox("Race", [
+                            "Human", "Elf", "Dwarf", "Halfling", "Gnome", "Half-Orc", "Tiefling"], key="race")
     with col2:
-        character_class = st.selectbox("Class", ["Fighter", "Wizard", "Rogue", "Cleric", "Paladin", "Ranger", "Barbarian"], key="class")
-        background = st.selectbox("Background", ["Acolyte", "Criminal", "Folk Hero", "Noble", "Sage", "Soldier"], key="background")
+        character_class = st.selectbox("Class", [
+                                       "Fighter", "Wizard", "Rogue", "Cleric", "Paladin", "Ranger", "Barbarian"], key="class")
+        background = st.selectbox("Background", [
+                                  "Acolyte", "Criminal", "Folk Hero", "Noble", "Sage", "Soldier"], key="background")
 
     # Ability Scores with Point Buy
     st.divider()
     st.subheader("Ability Scores")
     st.write(f"Total points remaining: {st.session_state.remaining_points}")
 
-    abilities = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]
+    abilities = ["Strength", "Dexterity", "Constitution",
+                 "Intelligence", "Wisdom", "Charisma"]
     col1, col2 = st.columns(2)
-    
+
     for i, ability in enumerate(abilities):
         with col1 if i % 2 == 0 else col2:
             score = st.number_input(
-                f"{ability}", 
-                min_value=8, 
-                max_value=15, 
-                value=st.session_state.ability_scores[ability], 
+                f"{ability}",
+                min_value=8,
+                max_value=15,
+                value=st.session_state.ability_scores[ability],
                 key=f"ability_{ability}",
                 on_change=update_ability_score,
                 args=(ability,)
             )
-            
+
             # Update session state
             old_score = st.session_state.ability_scores[ability]
             st.session_state.ability_scores[ability] = score
-            
+
             # Recalculate points
             old_points = calculate_points_spent(old_score)
             new_points = calculate_points_spent(score)
             st.session_state.remaining_points += old_points - new_points
-            
-            st.write(f"Points spent: {new_points}")
 
+            st.write(f"Points spent: {new_points}")
 
     if st.session_state.remaining_points < 0:
         st.warning("You have exceeded the available points!")
@@ -92,20 +97,23 @@ def create_character_form():
     # Skills
     st.divider()
     st.subheader("Skills")
-    skills = ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History", 
-              "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Perception", 
+    skills = ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "History",
+              "Insight", "Intimidation", "Investigation", "Medicine", "Nature", "Perception",
               "Performance", "Persuasion", "Religion", "Sleight of Hand", "Stealth", "Survival"]
-    
-    selected_skills = st.multiselect("Select Skills (based on your class)", skills, key="skills")
+
+    selected_skills = st.multiselect(
+        "Select Skills (based on your class)", skills, key="skills")
 
     # Equipment
     st.divider()
     st.subheader("Equipment")
-    
+
     col1, col2 = st.columns(2)
     with col1:
-        weapon_type = st.radio("Weapon Type", weapon_dict.keys(), key="weapon_type")
-        selected_weapon_name = st.radio("Armor", weapon_dict[weapon_type], key="weapon")
+        weapon_type = st.radio(
+            "Weapon Type", weapon_dict.keys(), key="weapon_type")
+        selected_weapon_name = st.radio(
+            "Armor", weapon_dict[weapon_type], key="weapon")
         weapon_details = weapon_dict[weapon_type][selected_weapon_name]
 
     with col2:
@@ -118,12 +126,14 @@ def create_character_form():
     st.divider()
     col1, col2 = st.columns(2)
     with col1:
-        armor_type = st.radio("Armor Type", armor_dict.keys(), key="armor_type")
-    
-        selected_armor_name = st.radio("Armor", armor_dict[armor_type],key="armor")
+        armor_type = st.radio(
+            "Armor Type", armor_dict.keys(), key="armor_type")
+
+        selected_armor_name = st.radio(
+            "Armor", armor_dict[armor_type], key="armor")
         # Get the selected armor details
         armor_details = armor_dict[armor_type][selected_armor_name]
-    
+
     with col2:
         # Display armor details
         st.write("Armor Details:")
@@ -131,7 +141,6 @@ def create_character_form():
             if key == "Cost":
                 continue
             st.write(f"{key}: {value}")
-
 
     other_equipment = st.text_area("Other Equipment", key="other_equipment")
 
@@ -175,7 +184,9 @@ def create_character_form():
         elif not name:
             st.error("Please enter a character name before saving.")
         else:
-            st.error(f"A character named '{name}' already exists. Please choose a different name.")
+            st.error(
+                f"A character named '{name}' already exists. Please choose a different name.")
+
 
 def display_character_list():
     if "character" not in st.session_state:

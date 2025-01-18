@@ -10,16 +10,18 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from src.game_workflows.loaders import load_characters
 from typing import List, Generator
 
+
 class OllamaApi:
-    def __init__(self, model:str, temperature:int=0.7) -> None:
+    def __init__(self, model: str, temperature: int = 0.7) -> None:
         try:
             self.llm = OllamaLLM(model=model, temperature=temperature)
-            self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1100, chunk_overlap=100)
+            self.text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1100, chunk_overlap=100)
         except requests.RequestException as e:
             st.error(f"API call error: {str(e)}")
             return f"Error: Unable to generate content. Please check Ollama status."
-    
-    def start_adventure(self, characters:List[str], difficulty:str, user_prompt:str=None)->Generator:
+
+    def start_adventure(self, characters: List[str], difficulty: str, user_prompt: str = None) -> Generator:
         if not user_prompt:
             user_prompt = "make it as instreasting as possible."
         template = """
@@ -47,12 +49,12 @@ class OllamaApi:
         characters_dict = load_characters()
         characters_str = ""
         for character in characters:
-            characters_str+=str(characters_dict[character])
+            characters_str += str(characters_dict[character])
 
-        for chunk in chain.stream({"characters_details":characters_str, "difficulty":difficulty, "user_prompt":user_prompt}):
+        for chunk in chain.stream({"characters_details": characters_str, "difficulty": difficulty, "user_prompt": user_prompt}):
             yield chunk
-    
-    def name_adventure(self, adventure:str)->str:
+
+    def name_adventure(self, adventure: str) -> str:
         '''
         adventure(str) : it is the text when the DM sets up the start of the adventure
         '''
@@ -67,22 +69,23 @@ class OllamaApi:
 
         chain = prompt | self.llm
 
-        return chain.invoke({"adventure":adventure})
+        return chain.invoke({"adventure": adventure})
 
-    def progress_story(self, chat_msg:dict[str, str], history:list)->Generator:
-        def get_history(chat:dict[str, str], chat_history:list):
+    def progress_story(self, chat_msg: dict[str, str], history: list) -> Generator:
+        def get_history(chat: dict[str, str], chat_history: list):
             history = chat_history.copy()
 
             history_retrieved_docs = []
             for msg in chat.values():
                 history_retrieved_docs.extend(
-                        st.session_state.history_store.similarity_search_by_vector_with_relevance_scores(
-                        embedding=st.session_state.embedding_model.embed_query(msg), 
+                    st.session_state.history_store.similarity_search_by_vector_with_relevance_scores(
+                        embedding=st.session_state.embedding_model.embed_query(
+                            msg),
                         k=2,
-                        filter = {
+                        filter={
                             "uuid": st.session_state["current_uuid"]
                         }
-                        )
+                    )
                 )
 
             historical_history = []
@@ -92,14 +95,15 @@ class OllamaApi:
                 else:
                     historical_history.append(HumanMessage(docs.page_content))
 
-            res_chat = [history[0][1]] # system prompt is stored for player context
-            history = [hist for _, hist in history[1:]] #
+            # system prompt is stored for player context
+            res_chat = [history[0][1]]
+            history = [hist for _, hist in history[1:]]
             res_chat.extend(historical_history)
-            res_chat.extend(history[-5:]) #last 5 messages
+            res_chat.extend(history[-5:])  # last 5 messages
 
             return res_chat
 
-        def get_input()->str:
+        def get_input() -> str:
             res = ""
             for character, message in chat_msg.items():
                 res += f"{character} said: {message}"
@@ -116,13 +120,13 @@ class OllamaApi:
 
         contextualize_q_prompt = ChatPromptTemplate.from_messages(
             [
-                    ("system", contextualize_q_system_prompt),
-                    MessagesPlaceholder("chat_history"),
-                    ("human", "{input}"),
+                ("system", contextualize_q_system_prompt),
+                MessagesPlaceholder("chat_history"),
+                ("human", "{input}"),
             ]
         )
         history_aware_retriever = create_history_aware_retriever(
-            self.llm, st.session_state.vector_store, contextualize_q_prompt #generates context
+            self.llm, st.session_state.vector_store, contextualize_q_prompt  # generates context
         )
 
         system_prompt = (
@@ -137,25 +141,27 @@ class OllamaApi:
 
         qa_prompt = ChatPromptTemplate.from_messages(
             [
-                    ("system", system_prompt),
-                    MessagesPlaceholder("chat_history"),
-                    ("human", "{input}"),
+                ("system", system_prompt),
+                MessagesPlaceholder("chat_history"),
+                ("human", "{input}"),
             ]
         )
 
+        question_answer_chain = create_stuff_documents_chain(
+            self.llm, qa_prompt)
 
-        question_answer_chain = create_stuff_documents_chain(self.llm, qa_prompt)
+        rag_chain = create_retrieval_chain(
+            history_aware_retriever, question_answer_chain)
 
-        rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
-        
         input_text = get_input()
         history_as_message = get_history(chat=chat_msg, chat_history=history)
 
-
-        for output in rag_chain.stream({"input":input_text, "chat_history":history_as_message}):
+        for output in rag_chain.stream({"input": input_text, "chat_history": history_as_message}):
             if "answer" in output:
                 yield output['answer']
 
-    def save_doc_to_history_vector(self, doc:Document)->None:
-        processed_history_docs = self.text_splitter.split_documents(documents=[doc])
-        st.session_state.history_store.add_documents(documents=processed_history_docs)
+    def save_doc_to_history_vector(self, doc: Document) -> None:
+        processed_history_docs = self.text_splitter.split_documents(documents=[
+                                                                    doc])
+        st.session_state.history_store.add_documents(
+            documents=processed_history_docs)

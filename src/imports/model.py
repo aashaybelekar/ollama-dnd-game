@@ -15,26 +15,32 @@ OLLAMA_API_ENDPOINT = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/generate"
 CHROMA_DB_DIR = os.getenv('CHROMA_DB_DIR', './5e_dnd_chroma_langchain_db')
 HISTORY_DB_DIR = os.getenv('HISTORY_DB_DIR', "./history")
 
+
 @st.cache_resource
 def initialize_rag():
-    handbook_store = Chroma(embedding_function=st.session_state.embedding_model, persist_directory=CHROMA_DB_DIR)
+    handbook_store = Chroma(
+        embedding_function=st.session_state.embedding_model, persist_directory=CHROMA_DB_DIR)
     return handbook_store.as_retriever()
+
 
 @st.cache_resource
 def initialize_history():
-    history_store = Chroma(embedding_function=st.session_state.embedding_model, persist_directory=HISTORY_DB_DIR)
+    history_store = Chroma(
+        embedding_function=st.session_state.embedding_model, persist_directory=HISTORY_DB_DIR)
     return history_store
+
 
 def manage_models():
     def list_ollama_models():
         try:
-            response = requests.get(OLLAMA_API_ENDPOINT.replace('/api/generate', '/api/tags'))
+            response = requests.get(
+                OLLAMA_API_ENDPOINT.replace('/api/generate', '/api/tags'))
             if response.status_code == 200:
                 return [model['name'] for model in response.json().get('models', [])]
             return []
         except requests.RequestException:
             return []
-        
+
     st.header("Manage Models")
 
     models = list_ollama_models()
@@ -54,11 +60,10 @@ def manage_models():
 
     if st.button("Save Model Selections"):
         st.session_state.dm_model = dm_model
-        st.session_state.api:OllamaApi = OllamaApi(model=dm_model) # type: ignore
-        st.session_state.embedding_model = HuggingFaceEmbeddings(model_name=embedding_model)
-        st.session_state.vector_store = initialize_rag() # retriver
-        st.session_state.history_store = initialize_history() # non retriver
+        st.session_state.api: OllamaApi = OllamaApi(
+            model=dm_model)  # type: ignore
+        st.session_state.embedding_model = HuggingFaceEmbeddings(
+            model_name=embedding_model)
+        st.session_state.vector_store = initialize_rag()  # retriver
+        st.session_state.history_store = initialize_history()  # non retriver
         st.success("Model selections saved!")
-
-
-

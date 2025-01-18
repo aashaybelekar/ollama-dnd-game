@@ -10,7 +10,8 @@ from src.game_workflows.player import display_character_list
 from dotenv import load_dotenv
 load_dotenv()
 
-st.set_page_config(page_title="LLM-DND", page_icon="🧙‍♂️", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="LLM-DND", page_icon="🧙‍♂️",
+                   layout="wide", initial_sidebar_state="expanded")
 system_status = st.sidebar.empty()
 ollama_placeholder = st.sidebar.empty()
 model_placeholder = st.sidebar.empty()
@@ -23,35 +24,33 @@ OLLAMA_API_ENDPOINT = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/generate"
 TURN_LIMIT = int(os.getenv('TURN_LIMIT', 10))
 
 
-
 def display_updated_status_sidebar():
     system_status.write("## System Status")
     ollama_status = "Running" if check_ollama_availability() else "Not Running"
     ollama_placeholder.write(f"Ollama Status: {ollama_status}")
-    model_placeholder.write(f"Models Set: {'Yes' if 'dm_model' in st.session_state else 'No'}")
-    rag_placeholder.write(f"RAG Initialized: {'Yes' if 'vector_store' in st.session_state else 'No'}")
+    model_placeholder.write(
+        f"Models Set: {'Yes' if 'dm_model' in st.session_state else 'No'}")
+    rag_placeholder.write(
+        f"RAG Initialized: {'Yes' if 'vector_store' in st.session_state else 'No'}")
 
 
 def main():
     set_fantasy_theme()
     st.title("🧙‍♂️ LLM-DND 🐉")
 
-    
     display_updated_status_sidebar()
     st.sidebar.divider()
 
     test_model_availability()
 
-    st.session_state.page = st.sidebar.radio("Navigation", ["Play Game", "Manage Models"], index=1)
+    st.session_state.page = st.sidebar.radio(
+        "Navigation", ["Play Game", "Manage Models"], index=1)
 
     if st.session_state.page == "Play Game":
         play_game()
 
         display_character_list()
         display_adventure_list()
-
-        
-
 
     elif st.session_state.page == "Manage Models":
         manage_models()
