@@ -10,5 +10,5 @@ python-dotenv
 sentence-transformers
 streamlit
 langchain_experimental
+watchdog
 neo4j
--e .
