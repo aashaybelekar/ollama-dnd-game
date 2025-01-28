@@ -1,0 +1,19 @@
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: tempollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    restart: always
+    command: serve
+  
+  dnd-game:
+    build: .
+    ports:
+      - 8501:8501
+
+volumes:
+  ollama:
+    external: true
