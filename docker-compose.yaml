@@ -11,8 +11,18 @@ services:
   
   dnd-game:
     build: .
+    env_file: ".env"
     ports:
       - 8501:8501
+    develop:
+      watch:
+        - action: sync
+          path: ./src 
+          target: /app/src
+        
+        - action: rebuild
+          path: requirements.txt
+
 
 volumes:
   ollama:

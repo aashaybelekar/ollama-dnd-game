@@ -4,7 +4,7 @@ import streamlit as st
 from dotenv import load_dotenv
 load_dotenv()
 
-OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'localhost')
+OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'ollama')
 OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
 OLLAMA_API_ENDPOINT = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/generate"
 

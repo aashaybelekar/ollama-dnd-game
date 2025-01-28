@@ -1,5 +1,7 @@
+import os
 import requests
 import streamlit as st
+from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_ollama.llms import OllamaLLM
@@ -10,13 +12,25 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from src.game_workflows.loaders import load_characters
 from typing import List, Generator
 
+load_dotenv()
+
+OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'ollama')
+OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
+OLLAMA_API_ENDPOINT = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}"
+
 
 class OllamaApi:
     def __init__(self, model: str, temperature: int = 0.7) -> None:
         try:
-            self.llm = OllamaLLM(model=model, temperature=temperature)
+            self.llm = OllamaLLM(
+                model=model,
+                temperature=temperature,
+                base_url=OLLAMA_API_ENDPOINT
+            )
             self.text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=1100, chunk_overlap=100)
+                chunk_size=1100,
+                chunk_overlap=100
+            )
         except requests.RequestException as e:
             st.error(f"API call error: {str(e)}")
             return f"Error: Unable to generate content. Please check Ollama status."

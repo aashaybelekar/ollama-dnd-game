@@ -17,7 +17,7 @@ ollama_placeholder = st.sidebar.empty()
 model_placeholder = st.sidebar.empty()
 rag_placeholder = st.sidebar.empty()
 
-OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'localhost')
+OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'ollama')
 OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434")
 OLLAMA_API_ENDPOINT = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}/api/generate"
 
