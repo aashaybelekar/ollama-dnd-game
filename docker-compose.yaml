@@ -10,7 +10,7 @@ services:
     command: serve
   
   dnd-game:
-    build: .
+    build: ./backend
     env_file: ".env"
     ports:
       - 8501:8501
