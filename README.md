@@ -1,126 +1,138 @@
-# DnD Adventure Game
+<div align="center">
 
-## Table of Contents
-- [Technical Overview](#technical-overview)
-- [Features](#features)
-- [Retriever Chain Architecture](#retriever-chain-architecture)
-- [App Preview](#app-preview)
-- [Setup and Installation](#setup-and-installation)
+# 🧙‍♂️ LLM-DND 🐉
 
-## Technical Overview
+*An immersive, AI-powered Dungeons & Dragons adventure game utilizing advanced natural language processing and RAG to create a dynamic gaming experience.*
 
-This project is a Dungeons & Dragons (DnD) adventure game that utilizes advanced natural language processing and information retrieval techniques to create an immersive and dynamic gaming experience. Here are the key technical components:
+[![Python Version](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python)](https://www.python.org/)
+[![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black?style=flat)](https://ollama.com/)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- **UI Framework**: Streamlit
-- **Information Retrieval**: 
-  - Normal retriever for extracting information from the 5e DnD handbook
-  - Vector store for storing and retrieving relevant previous history
-- **Data Storage**: 
-  - Vector store for efficient similarity-based retrieval
-  - List-based storage for maintaining chronological history
+</div>
 
-## Features
+---
 
-1. **Manage Models Page**: Configure and set up the game models.
-2. **Create Character Page**: Design and customize your DnD character.
-3. **Play Game Page**: Engage in adventures with your created characters.
-4. **Adventure Storage**: Save and load adventures for continuous gameplay.
+**LLM-DND** is a self-hosted web application that acts as your personal Dungeon Master. By combining the power of local Large Language Models (via Ollama) with Retrieval-Augmented Generation (RAG) referencing the 5e DnD handbook, this application offers an endless, context-aware tabletop RPG experience right in your browser.
 
-## Retriever Chain Architecture
+## 📑 Table of Contents
+
+- [Features](#-features)
+- [Technology Stack](#-technology-stack)
+- [Architecture](#️-architecture)
+- [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation & Setup](#installation--setup)
+- [Configuration](#️-configuration)
+- [Usage](#-usage)
+- [License](#-license)
+
+---
+
+## ✨ Features
+
+- **Manage Models Page:** Easily configure and set up your preferred local Ollama models for both the Dungeon Master and embeddings.
+- **Deep Character Creation:** Design your hero using a point-buy ability score system, and select your race, class, background, skills, and equipment (weapons/armor).
+- **Play Game Page:** Engage in rich, narrative-driven adventures where the AI tracks the history and context of your entire party.
+- **Adventure Storage:** Create, save, load, and delete multiple adventure histories to ensure you can pick up your campaigns right where you left off.
+- **Immersive Fantasy Theme:** A beautifully styled Streamlit UI featuring the 'Cinzel' font and dark fantasy aesthetics.
+
+---
+
+## 🚀 Technology Stack
+
+| Domain | Technologies |
+| :--- | :--- |
+| **Frontend/UI** | Python, Streamlit |
+| **LLM Orchestration** | LangChain (`langchain-ollama`, `langchain-chroma`, `langchain-huggingface`) |
+| **Local AI Engine** | Ollama |
+| **Embeddings** | HuggingFace (`sentence-transformers`) |
+| **Database (Vector & Storage)**| ChromaDB, Local Pickle/JSON files |
+
+---
+
+## 🏗️ Architecture
+
+The application relies on a dual-retriever chain architecture:
+1. User input is processed by a **normal retriever** (extracting rules from the 5e DnD handbook) and a **vector store retriever** (fetching historical context).
+2. The context feeds into the Dungeon Master LLM to generate an immersive response.
+3. The progression is saved in both chronologic lists and the history vector database.
 
 ![Chain Architecture](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/LLM-DnD.png "Chain Architecture")
 
-This diagram illustrates the flow of information in our retriever chain:
+---
 
-1. User input is processed by both the normal retriever and the vector store retriever.
-2. The normal retriever extracts relevant information from the 5e DnD handbook.
-3. The vector store retriever fetches relevant previous history.
-4. Both retrievers feed into the game logic.
-5. The game logic generates a response, which is then used to update both the vector store and the chronological history list.
+## 🏁 Getting Started
 
-## App Preview
+### Prerequisites
 
-#### Model Selection Page
-![Model page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/Model_setup_page.png "Model page")
+Ensure you have the following installed on your machine:
+- **Python 3.10+** (Conda is recommended for environment management)
+- **Ollama** ([Installation Guide](https://ollama.com/download))
 
-#### Character Creation Page
-![character page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/character_creation_page.png "character page")
+### Installation & Setup
 
-![character page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/character_creation_page_2.png "character page")
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/aashaybelekar/ollama-dnd-game.git
+   cd ollama-dnd-game
+   ```
 
-![character page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/character_creation_page_3.png "character page")
+2. **Start the Ollama Service:**
+   Ensure Ollama is running on your machine.
+   ```bash
+   ollama serve
+   ```
+   *Verify it's running by executing `ollama -v` in a new terminal.*
 
-#### Adventure Page
-![Adventure page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/Adventure_page.png "Adventure page")
+3. **Pull Your Preferred Models:**
+   Pull the model you want to use for the Dungeon Master (e.g., `llama3.1`).
+   ```bash
+   ollama pull llama3.1
+   ```
 
-![Adventure page](https://raw.githubusercontent.com/aashaybelekar/ollama-dnd-game/main/artifacts/Chat_page.png "Adventure page")
+4. **Set Up Python Environment:**
+   Create and activate a new Conda environment:
+   ```bash
+   conda create -n dm_env python=3.10
+   conda activate dm_env
+   ```
 
-## Setup and Installation
+5. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-<div align="center">
-<img alt="ollama" height="100px" src="https://github.com/ollama/ollama/assets/3325447/0d0b44e2-8f4a-4e99-9b52-a5c1c741c8f7">
-</div>
+6. **Run the Streamlit Application:**
+   ```bash
+   streamlit run main.py
+   ```
 
-### 1. Install Ollama
+---
 
-#### macOS
+## ⚙️ Configuration
 
-[Download](https://ollama.com/download/Ollama-darwin.zip)
+You can configure the application by creating a `.env` file in the root directory. The application recognizes the following environment variables:
 
-#### Windows preview
+| Variable | Description | Default Value |
+| :--- | :--- | :--- |
+| `OLLAMA_HOST` | Hostname for your Ollama service. | `localhost` |
+| `OLLAMA_PORT` | Port exposed by Ollama. | `11434` |
+| `TURN_LIMIT` | Message history limit. | `10` |
+| `CHROMA_DB_DIR` | Path to store the RAG vector database. | `./5e_dnd_chroma_langchain_db` |
+| `HISTORY_DB_DIR`| Path to store the adventure histories. | `./history` |
+| `CHARACTERS_FILE` | Path to the character JSON storage. | `characters.json` |
 
-[Download](https://ollama.com/download/OllamaSetup.exe)
+---
 
-### Linux
+## ▶️ Usage
 
-```
-curl -fsSL https://ollama.com/install.sh | sh
-```
+1. **Manage Models**: Open the app and navigate to **"Manage Models"** from the sidebar. Select your Dungeon Master Model (e.g., `llama3.1:latest`) and an Embedding Model (e.g., `sentence-transformers/all-MiniLM-L6-v2`) and click **Save Model Selections**.
+2. **Create a Character**: Go to **"Play Game"** -> **"Create a Character"**. Use the character creation form to allocate ability points (max 27), set up weapons and armor, and type your backstory.
+3. **Start an Adventure**: Click **"Start Adventure"**, choose your hero(es), select a difficulty (Easy, Medium, or Hard), and provide an optional custom world prompt. Let the AI DM set the scene and start your quest!
 
-[Manual install instructions](https://github.com/ollama/ollama/blob/main/docs/linux.md)
+---
 
-### 2. Run Ollama
+## 📝 License
 
-1. On Windows and macOS: Run the application to start the ollama service
-2. On linux: run the following command
-    ```
-    ollama serve
-    ```
-    To verify if it's running you can open a new terminal and run
-    ```
-    ollama -v
-    ```
-    Other details are given in the [Manual install instructions](https://github.com/ollama/ollama/blob/main/docs/linux.md) of linux
-
-### 3. Pull the model you wish to run the game on
-pull the model using
-```
-ollama pull {model}
-```
-for llama3.1:
-```
-ollama pull llama3.1
-```
-
-### 4. Install requirements
-
-for best practice, make a seperate enviornment
-```
-conda create -n dm_env python=3.10.*
-```
-
-run the enviornment
-```
-conda activate dm_env
-```
-
-install the requirements
-```
-pip install -r requirements.txt
-```
-
-### 5. Run the streamlit application
-
-```
-streamlit run main.py
-```
+This software is provided "AS IS", without warranty of any kind. This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
